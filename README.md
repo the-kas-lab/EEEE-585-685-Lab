@@ -1,4 +1,4 @@
-# EEEE-585-685-Lab_internal
+# EEEE-585-685-Lab
 
 Code materials for the EEEE 585/685 labs, maintained by the group admins.
 
