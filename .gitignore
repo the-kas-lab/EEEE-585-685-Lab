@@ -1,0 +1,12 @@
+# catkin (ROS 1) and colcon (ROS 2) workspace build output.
+**/catkin_ws/build/
+**/catkin_ws/devel/
+**/catkin_ws/install/
+**/catkin_ws/logs/
+**/catkin_ws/.catkin_workspace
+**/catkin_ws/.catkin_tools/
+**/catkin_ws/src/CMakeLists.txt
+
+**/ros2_ws/build/
+**/ros2_ws/install/
+**/ros2_ws/log/

@@ -1,0 +1,28 @@
+{
+  "name": "turtlesim (ROS 2 Humble - macOS)",
+  "build": {
+    "dockerfile": "../../docker/Dockerfile",
+    "context": "../../docker",
+    "args": {
+      "USERNAME": "robotuser",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "remoteUser": "robotuser",
+  "updateRemoteUserUID": true,
+  "postCreateCommand": "bash docker/postCreate.sh",
+  "runArgs": [
+    "-e", "DISPLAY=host.docker.internal:0"
+  ],
+  "containerEnv": {
+    "DISPLAY": "host.docker.internal:0",
+    "LIBGL_ALWAYS_INDIRECT": "0",
+    "ROS_DOMAIN_ID": "0"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-iot.vscode-ros"]
+    }
+  }
+}
