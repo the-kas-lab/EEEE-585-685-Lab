@@ -1,0 +1,113 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{xcolor}
+\geometry{margin=1in}
+
+\begin{document}
+\noindent
+\setlength{\fboxsep}{10pt}
+\hspace*{\fill} 
+\colorbox{black}{\parbox{0.35\linewidth}{\color{white}\textbf{Rochester Institute of\\ Technology}}}\\
+
+\noindent
+{\huge \textbf{EEEE585/685 Tech Memo}} \\
+\vspace{6pt} \\
+\textbf{From:} Student A \\
+\textbf{Performed:} September Xth, 2025 \\
+\textbf{Due:} September Xth, 2025 \\
+\textbf{Subject:} Lab \#1 – Skeleton Guideline to Principles of Robotics Tech Memo Expectations
+
+\noindent
+\rule{\textwidth}{0.4pt}
+
+\section*{Abstract}
+General topics that need to be expressed in the abstract about the current robot of interest:
+\begin{itemize}
+    \item \textit{Configuration} $\rightarrow$ Differential drive, legged, arm, degrees of freedom, etc...
+    \item \textit{Locomotion} $\rightarrow$ Walking, rolling, prismatic, revolute, etc...
+    \item \textit{Programming} $\rightarrow$ Micro-controller, language, operating system, etc...
+    \item \textit{Control} $\rightarrow$ Controller boards, communication, extra hardware, etc...
+    \item \textit{Sensor(s)} $\rightarrow$ IR, ultrasonic, none, etc...
+    \item \textit{Behavior(s)} $\rightarrow$ Obstacle Detection/Avoidance, tele-operation, pre-determined sequences, etc...
+\end{itemize}
+
+\section*{Theory}
+Each of the experiments for the Principles of Robotics course is designed around a specific robot. Below is a list of suggested items with example questions that should be answered in the thoery section. The theory is not procedure, the procedure is provided in the lab handout, so:
+\begin{itemize}
+    \item Motors
+    \begin{itemize}
+        \item How/why is the motor typically used?
+        \item How does the particular motor operate?
+        \item What control signal is required?
+        \item How does the rotation/translation of the motor relate to the motion of the robot or its joints?
+    \end{itemize}
+    \newpage
+    \item Sensors
+    \begin{itemize}
+        \item How/why is the sensor typically used?
+        \item What does the sensor measure?
+        \item How is it interfaced with the controller board(s) and/or programming language?
+        \item What control signals are required?
+        \item What signal is returned
+    \end{itemize}
+    \item Calculations
+    \begin{itemize}
+        \item What conversion equations were used?
+        \item What calibration processes were performed?
+        \item How were sensors, motors, etc. modeled to predict results?
+        \item Trial and error might actually be a suitable answer.
+    \end{itemize}
+    \item High-Level Behavior
+    \begin{itemize}
+        \item What is the behavior?
+        \item Why is the behavior used and in what context?
+        \item Does this behavior require feedback (what sensors?)
+        \item What actions are taken within the behavior?
+    \end{itemize}
+    \item Locomotion
+    \begin{itemize}
+        \item Why is this type of locomotion suitable for the robot?
+        \item What are the mechanics of the locomotion?
+    \end{itemize}
+\end{itemize}
+
+\section*{Results and Discussion}
+This section is twofold, one being the result and the other the discussion. The results are what you have accomplished in the lab using the provided theory and procedure in the handout. The discussion is explaining the results that you have seen or implemented. Below is a list of general results and corresponding discussion.
+
+\subsection*{Results}
+\begin{itemize}
+    \item Custom locomotion or path planning, figures and tables might be useful in showing the results.
+    \item Any specific equations used that were used that might expand on the theoretical equations explained in the theory.
+    \item Calibration/conversion results.
+    \item Tables of collected data from sensors.
+    \item Charts plotting sensor data with correct trendline to represent the data and the equation of the trendline on the chart.
+    \item Flow chart of behaviors.
+    \item Screen captures of simulations.
+\end{itemize}
+
+\subsection*{Discussion}
+\begin{itemize}
+    \item Compare and contrast different locomotion schemes or path planning strategies .
+    \item Explain the results of any equations or data collection, are they expected?
+    \item Why was data collection performed? Was the data meaningful? How was the data used?
+    \item Why was calibration or conversions needed?
+    \item Explain all figures, tables, and equations.
+    \item General Statement: Each lab requirement is there for a reason and therefore there can be something to be discussed about it.
+\end{itemize}
+\section*{Conclusions}
+A brief section containing one or two paragraphs that concisely states the nature/objective of the assignment, the approach taken to complete the assignment, and general observations about the outcome(s). Brief commentary on agreement - or lack thereof - between theory and experiment would be appropriate, but specific results that were already reported and discussed at length in the \textit{Results and Discussion} \textbf{should not be reported here}.
+
+\section*{Appendix}
+Include any relevant material that cannot be placed in the main body of the text without detracting from its appearance and readability.
+\begin{itemize}
+    \item Include the questions.
+    \item Large figures.
+    \item Special code.
+    \item References used, making sure to properly cite the reference throughout the memo.
+\end{itemize}
+
+\end{document}
