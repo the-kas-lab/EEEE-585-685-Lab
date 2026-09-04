@@ -11,7 +11,7 @@
   },
   "remoteUser": "robotuser",
   "updateRemoteUserUID": true,
-  "postCreateCommand": "bash docker/postCreate.sh",
+  "postCreateCommand": "sed -i 's/\\r$//' docker/postCreate.sh && bash docker/postCreate.sh",
   "runArgs": [
     "-e", "DISPLAY=host.docker.internal:0"
   ],
