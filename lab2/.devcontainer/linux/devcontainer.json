@@ -18,8 +18,19 @@
     "DISPLAY=${localEnv:DISPLAY}",
     "-v",
     "/tmp/.X11-unix:/tmp/.X11-unix:rw",
-    "--device=/dev/ttyUSB0:/dev/ttyUSB0",
-    "--group-add=dialout"
+    // Serial passthrough for the SSC-32U. Bind-mounting /dev instead of
+    // "--device=/dev/ttyUSB0" means the container starts whether or not the
+    // arm is attached, and a device plugged in later shows up without a
+    // rebuild. The cgroup rules grant access to the tty majors the adapter
+    // may enumerate as: 188 = ttyUSB* (FTDI/CP210x), 166 = ttyACM* (CDC-ACM).
+    "-v",
+    "/dev:/dev",
+    "--device-cgroup-rule=c 188:* rmw",
+    "--device-cgroup-rule=c 166:* rmw",
+    // "dialout" resolves inside the container (Ubuntu: GID 20). Fedora and
+    // RHEL-family hosts own serial nodes by GID 18, so add that numerically.
+    "--group-add=dialout",
+    "--group-add=18"
   ],
   "containerEnv": {
     "DISPLAY": "${localEnv:DISPLAY}",

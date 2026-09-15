@@ -14,7 +14,17 @@
   "postCreateCommand": "sed -i 's/\\r$//' docker/postCreate.sh && bash docker/postCreate.sh",
   "runArgs": [
     "-e", "DISPLAY=host.docker.internal:0",
-    "--device=/dev/ttyUSB0:/dev/ttyUSB0",
+    // Serial passthrough for the SSC-32U. usbipd attaches the adapter to the
+    // WSL2 VM, whose kernel is shared by every WSL distro including Docker
+    // Desktop's, so the node shows up in the VM's /dev. Bind-mounting that
+    // (rather than "--device=/dev/ttyUSB0") lets the container start when the
+    // adapter is detached -- which on Windows is the normal state, since a
+    // usbipd attach drops on every unplug and reboot -- and lets a later
+    // attach appear without a rebuild. Majors: 188 = ttyUSB* (FTDI/CP210x),
+    // 166 = ttyACM* (CDC-ACM).
+    "-v", "/dev:/dev",
+    "--device-cgroup-rule=c 188:* rmw",
+    "--device-cgroup-rule=c 166:* rmw",
     "--group-add=dialout"
   ],
   "containerEnv": {

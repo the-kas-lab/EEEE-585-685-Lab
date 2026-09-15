@@ -3,13 +3,15 @@
 The `lynxmotion_ssc32` driver talks to the SSC-32(U) servo controller over
 a USB-serial connection at `/dev/ttyUSB0` (see
 [ssc32_driver.cpp](../catkin_ws/src/lynxmotion_ssc32/src/ssc32_driver.cpp)).
-On Linux that device node is passed straight into the container — the
-`linux` devcontainer config's `--device=/dev/ttyUSB0:/dev/ttyUSB0` and
-`--group-add=dialout`. Docker Desktop on Windows runs containers inside a
+On Linux the host's `/dev` is bind-mounted into the container and access
+to the USB-serial tty majors is granted via `--device-cgroup-rule` (see the
+`linux` devcontainer config). That container starts whether or not the arm
+is attached, and picks up a device plugged in later without a rebuild — an
+earlier `--device=/dev/ttyUSB0:/dev/ttyUSB0` made the arm mandatory just to
+open the workspace. Docker Desktop on Windows runs containers inside a
 WSL2 VM, which has no USB stack by default, so the device has to be
 attached to that VM first. That's what this page sets up; the `windows`
-devcontainer config already requests the same `/dev/ttyUSB0` + `dialout`
-passthrough as Linux once it's there.
+devcontainer config then exposes it the same way the `linux` one does.
 
 macOS has the same underlying gap (Docker Desktop's VM has no direct USB
 passthrough) but isn't covered here — ask if you need it.
@@ -47,6 +49,14 @@ passthrough) but isn't covered here — ask if you need it.
    ```powershell
    usbipd attach --wsl --busid <BUSID>
    ```
+   Add `--auto-attach` to have usbipd re-attach automatically on replug:
+   ```powershell
+   usbipd attach --wsl --busid <BUSID> --auto-attach
+   ```
+   All WSL2 distros share one kernel, so an attach made from any distro
+   (including Docker Desktop's own `docker-desktop`) is visible to the
+   Docker engine — usbipd says as much: *"the device will be available in
+   all WSL 2 distributions."*
 5. Verify it showed up inside WSL2 — open a WSL terminal (`wsl`) and run:
    ```bash
    ls /dev/ttyUSB*
@@ -54,9 +64,10 @@ passthrough) but isn't covered here — ask if you need it.
    You should see `/dev/ttyUSB0`. If it's missing, see
    [Troubleshooting](#troubleshooting).
 6. Open (or reopen) the lab2 container: **Dev Containers: Reopen in
-   Container**, `windows` config. Its `runArgs` now request `/dev/ttyUSB0`
-   and `dialout` group membership, same as Linux, so it'll fail fast with a
-   clear error if the device isn't attached yet.
+   Container**, `windows` config. The container starts whether or not the
+   adapter is attached, and an attach made *after* it's running shows up
+   inside without a rebuild — so if you forget step 4, just do it and carry
+   on rather than reopening.
 
 > Unplugging/replugging the controller, or restarting Windows, drops the
 > WSL attachment — redo step 4 (not the full bind) each time.
@@ -72,12 +83,33 @@ passthrough) but isn't covered here — ask if you need it.
   Windows-side serial tools (Arduino IDE, PuTTY, the Lynxmotion SSC-32
   utility, etc.) first.
 - **Container fails to start with `/dev/ttyUSB0: no such file or
-  directory`** — the device wasn't attached to WSL2 *before* the container
-  started. Redo the "Each session" steps above, then reopen the container.
+  directory`** — this shouldn't happen any more on either platform. If it
+  does, you're on a stale container built from the old config, which used
+  `--device=/dev/ttyUSB0` and so refused to start without the adapter. Fix
+  with **Dev Containers: Rebuild Container** — `runArgs` are only applied
+  when a container is created, so Retry will keep failing.
+- **Windows: container starts, but `/dev/ttyUSB0` isn't inside it** — check
+  it exists in the VM first (`wsl ls /dev/ttyUSB*`). If it's there but not
+  in the container, redo step 4; if it's missing there too, the attach
+  dropped. As a last resort add `"--privileged"` to the `windows` config's
+  `runArgs` — widely reported to work where narrower flags don't, at the
+  cost of giving the container full host capabilities.
+- **Linux: `/dev/ttyUSB0` missing but `/dev/ttyACM0` present** — some
+  adapters enumerate as CDC-ACM. Both majors are passed through, so just
+  point the driver at the right node (`port` in
+  [alb5_ssc32.config](../catkin_ws/src/lynxmotion_ssc32/config/alb5_ssc32.config)).
+- **Fedora/RHEL: permission denied on the port even though the node is
+  visible** — those hosts own serial devices by GID 18, while `dialout`
+  inside the Ubuntu-based container is GID 20; the `linux` config adds both.
+  If SELinux is enforcing and still denies access, check `sudo ausearch -m
+  avc -ts recent`.
 - **Permission denied opening the port inside the container** — check
   `robotuser` is in the `dialout` group (`groups` inside the container);
-  `--group-add=dialout` in the devcontainer config should handle this
-  automatically.
+  the `--group-add` entries in the devcontainer config should handle this
+  automatically. If the node came up `root:root` (no udev rule applied it
+  to `dialout`), `ls -l /dev/ttyUSB0` will show it — `robotuser` has
+  passwordless sudo, so `sudo chown root:dialout /dev/ttyUSB0` unblocks
+  you for that session.
 
 ## Sanity check
 
