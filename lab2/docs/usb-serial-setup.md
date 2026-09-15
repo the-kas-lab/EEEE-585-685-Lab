@@ -3,12 +3,21 @@
 The `lynxmotion_ssc32` driver talks to the SSC-32(U) servo controller over
 a USB-serial connection at `/dev/ttyUSB0` (see
 [ssc32_driver.cpp](../catkin_ws/src/lynxmotion_ssc32/src/ssc32_driver.cpp)).
-On Linux the host's `/dev` is bind-mounted into the container and access
-to the USB-serial tty majors is granted via `--device-cgroup-rule` (see the
-`linux` devcontainer config). That container starts whether or not the arm
-is attached, and picks up a device plugged in later without a rebuild — an
-earlier `--device=/dev/ttyUSB0:/dev/ttyUSB0` made the arm mandatory just to
-open the workspace. Docker Desktop on Windows runs containers inside a
+On Linux the host's `/dev` is bind-mounted into the container **at
+`/host/dev`**, access to the USB-serial tty majors is granted via
+`--device-cgroup-rule`, and
+[link-serial.sh](../.devcontainer/link-serial.sh) symlinks
+`/dev/ttyUSB* -> /host/dev/ttyUSB*` on every container start so the
+driver's default path still works. That container starts whether or not
+the arm is attached, and picks up a device plugged in later without a
+rebuild — an earlier `--device=/dev/ttyUSB0:/dev/ttyUSB0` made the arm
+mandatory just to open the workspace.
+
+> **Why not mount the host `/dev` straight onto `/dev`?** It works for the
+> serial port and breaks everything else: the container inherits the host's
+> devpts instance, pty allocation then fails with `grantpt: Operation not
+> permitted`, and you get a container with no working terminal and a VS Code
+> server that won't start ([moby#15070](https://github.com/moby/moby/issues/15070)). Docker Desktop on Windows runs containers inside a
 WSL2 VM, which has no USB stack by default, so the device has to be
 attached to that VM first. That's what this page sets up; the `windows`
 devcontainer config then exposes it the same way the `linux` one does.
@@ -103,6 +112,15 @@ passthrough) but isn't covered here — ask if you need it.
   inside the Ubuntu-based container is GID 20; the `linux` config adds both.
   If SELinux is enforcing and still denies access, check `sudo ausearch -m
   avc -ts recent`.
+- **Terminals won't open / VS Code server dies / `grantpt: Operation not
+  permitted`** — a container built from the intermediate config that
+  bind-mounted the host `/dev` over `/dev`. **Dev Containers: Rebuild
+  Container** to pick up the `/host/dev` layout.
+- **`ls -l /dev/ttyUSB0` shows a broken symlink** — expected when nothing is
+  plugged in; it points at `/host/dev/ttyUSB0` and resolves as soon as the
+  adapter appears. `ls /host/dev/tty*` shows what's actually attached. If a
+  device *is* attached and the link is still broken, rerun
+  `bash .devcontainer/link-serial.sh`.
 - **Permission denied opening the port inside the container** — check
   `robotuser` is in the `dialout` group (`groups` inside the container);
   the `--group-add` entries in the devcontainer config should handle this

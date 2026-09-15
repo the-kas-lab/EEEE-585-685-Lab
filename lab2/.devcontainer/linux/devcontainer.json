@@ -12,19 +12,22 @@
   "remoteUser": "robotuser",
   "updateRemoteUserUID": true,
   "postCreateCommand": "sed -i 's/\\r$//' docker/postCreate.sh && bash docker/postCreate.sh",
+  "postStartCommand": "sed -i 's/\\r$//' .devcontainer/link-serial.sh && bash .devcontainer/link-serial.sh",
   "runArgs": [
     "--network=host",
     "-e",
     "DISPLAY=${localEnv:DISPLAY}",
     "-v",
     "/tmp/.X11-unix:/tmp/.X11-unix:rw",
-    // Serial passthrough for the SSC-32U. Bind-mounting /dev instead of
-    // "--device=/dev/ttyUSB0" means the container starts whether or not the
-    // arm is attached, and a device plugged in later shows up without a
-    // rebuild. The cgroup rules grant access to the tty majors the adapter
-    // may enumerate as: 188 = ttyUSB* (FTDI/CP210x), 166 = ttyACM* (CDC-ACM).
+    // Serial passthrough for the SSC-32U. The host's /dev is bind-mounted at
+    // /host/dev -- NOT over /dev, which would replace the container's devpts
+    // and break pty allocation (moby#15070): no terminals, no VS Code server.
+    // link-serial.sh symlinks /dev/ttyUSB* -> /host/dev/ttyUSB* on each start,
+    // so the driver's default path works and a device plugged in later is
+    // picked up without a rebuild. Majors: 188 = ttyUSB* (FTDI/CP210x),
+    // 166 = ttyACM* (CDC-ACM).
     "-v",
-    "/dev:/dev",
+    "/dev:/host/dev",
     "--device-cgroup-rule=c 188:* rmw",
     "--device-cgroup-rule=c 166:* rmw",
     // "dialout" resolves inside the container (Ubuntu: GID 20). Fedora and
