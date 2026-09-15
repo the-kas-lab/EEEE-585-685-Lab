@@ -1,0 +1,486 @@
+<robot
+ name="alb5">
+
+
+<!-- Links -->
+
+  <link
+    name="universal_link"/>
+
+  <link
+    name="universal_base">
+    <inertial>
+      <origin
+        xyz="-0.053039 -0.00017356 0.025812"
+        rpy="0 0 0" />
+      <mass
+        value="0.047047" />
+      <inertia
+        ixx="5.2284E-05"
+        ixy="-3.601E-07"
+        ixz="6.855E-08"
+        iyy="5.2284E-05"
+        iyz="-6.855E-08"
+        izz="8.6172E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/universal_base.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.50196 0.50196 0.50196 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/universal_base.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.012308 -0.0014042 0.014799"
+        rpy="0 0 0" />
+      <mass
+        value="0.12174" />
+      <inertia
+        ixx="5.1598E-05"
+        ixy="3.9703E-07"
+        ixz="-7.2302E-06"
+        iyy="6.5945E-05"
+        iyz="4.1623E-07"
+        izz="8.4968E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="shoulder_link">
+    <inertial>
+      <origin
+        xyz="0.066744 -4.1633E-17 -0.0019391"
+        rpy="0 0 0" />
+      <mass
+        value="0.015039" />
+      <inertia
+        ixx="1.1153E-05"
+        ixy="-9.0248E-11"
+        ixz="-1.4331E-06"
+        iyy="2.9548E-05"
+        iyz="-3.2558E-21"
+        izz="1.9883E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/shoulder_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79608 0.82353 0.93725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/shoulder_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="elbow_link">
+    <inertial>
+      <origin
+        xyz="0.015845 0.0003785 0.0069996"
+        rpy="0 0 0" />
+      <mass
+        value="0.08291" />
+      <inertia
+        ixx="1.8696E-05"
+        ixy="6.1592E-06"
+        ixz="7.2825E-06"
+        iyy="7.2928E-05"
+        iyz="6.2765E-07"
+        izz="7.3916E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0.05831840 0 0"
+        rpy="3.14159 3.14159 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/elbow_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.0012183 0 0"
+        rpy="3.14159 3.14159 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/elbow_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="elbow_twist_link">
+    <inertial>
+      <origin
+        xyz="0.0029382 0.0015075 0.029386"
+        rpy="0 0 0" />
+      <mass
+        value="0.043897" />
+      <inertia
+        ixx="1.1596E-05"
+        ixy="2.7195E-07"
+        ixz="-1.1712E-07"
+        iyy="1.4764E-05"
+        iyz="3.4709E-07"
+        izz="8.1213E-06" />
+    </inertial>
+  </link>
+
+  <link
+    name="wrist_link">
+    <inertial>
+      <origin
+        xyz="0.040119 -0.00065426 0.0042288"
+        rpy="-0.1 0 0" />
+      <mass
+        value="0.052802" />
+      <inertia
+        ixx="1.6001E-05"
+        ixy="-7.1131E-08"
+        ixz="3.1427E-06"
+        iyy="3.0906E-05"
+        iyz="-9.7169E-07"
+        izz="2.0576E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="-0.1 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/wrist_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/wrist_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="wrist_twist_link">
+    <inertial>
+      <origin
+        xyz="0.0065571 0.01077 0.012875"
+        rpy="0 0 0" />
+      <mass
+        value="0.03642" />
+      <inertia
+        ixx="6.6241E-06"
+        ixy="1.1686E-06"
+        ixz="6.0837E-08"
+        iyy="8.5646E-06"
+        iyz="1.085E-07"
+        izz="1.204E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 -0.002 0.0035"
+        rpy="0 0 -0.08" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/wrist_twist_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/wrist_twist_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link
+    name="gripper_link">
+    <inertial>
+      <origin
+        xyz="0.00017582 -0.0025503 -0.02176"
+        rpy="0 0 0" />
+      <mass
+        value="0.011113" />
+      <inertia
+        ixx="2.3432E-06"
+        ixy="2.8331E-07"
+        ixz="2.8618E-08"
+        iyy="6.1948E-06"
+        iyz="5.2081E-07"
+        izz="5.0216E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 -0.002 0.0035"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/gripper_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 -0.08" />
+      <geometry>
+        <mesh
+          filename="package://alb5_description/meshes/gripper_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+
+<!-- Joints -->  
+
+  <joint
+    name="universal_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="universal_link" />
+    <child
+      link="universal_base" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <joint
+    name="base"
+    type="revolute">
+    <origin
+      xyz="-0.053523 0.00068628 0.046204"
+      rpy="0 0 0" />
+    <parent
+      link="universal_base" />
+    <child
+      link="base_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1.5" />
+    <dynamics
+      damping="0.7"
+      friction="0" />
+  </joint>
+
+  <joint
+    name="shoulder"
+    type="revolute">
+    <origin
+      xyz="-0.0013006 -0.0003321 0.02048"
+      rpy="-1.5708 -1.5708 -3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="shoulder_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1.5" />
+    <dynamics
+      damping="0.7"
+      friction="0" />
+  </joint>
+
+  <joint
+    name="elbow"
+    type="revolute">
+    <origin
+      xyz="0.11909 0 -0.0006096"
+      rpy="0 0 -1.5708" />
+    <parent
+      link="shoulder_link" />
+    <child
+      link="elbow_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1.5" />
+    <dynamics
+      damping="0.7"
+      friction="0" />
+  </joint>
+
+  <joint
+    name="elbow_twist"
+    type="fixed">
+    <origin
+      xyz="0.069191 -0.0059635 0.008392"
+      rpy="1.5708 1.5708 1.5708" />
+    <parent
+      link="elbow_link" />
+    <child
+      link="elbow_twist_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1.5" />
+    <dynamics
+      damping="0.7"
+      friction="0" />
+  </joint>
+
+  <joint
+    name="wrist"
+    type="revolute">
+    <origin
+      xyz="0.008 0.005 0.0685"
+      rpy="0 -1.5708 0" />
+    <parent
+      link="elbow_twist_link" />
+    <child
+      link="wrist_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1" />
+    <dynamics
+      damping="0.1"
+      friction="0" />
+  </joint>
+
+  <joint
+    name="wrist_twist"
+    type="revolute">
+    <origin
+      xyz="0.074447 0.00051434 0.015966"
+      rpy="0 -1.5708 3.1416" />
+    <parent
+      link="wrist_link" />
+    <child
+      link="wrist_twist_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1.5" />
+    <dynamics
+      damping="0.7"
+      friction="0" />
+  </joint>
+
+  <joint
+    name="gripper"
+    type="revolute">
+    <origin
+      xyz="0 0 0.053708"
+      rpy="0 0 0" />
+    <parent
+      link="wrist_twist_link" />
+    <child
+      link="gripper_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="1.5" />
+    <dynamics
+      damping="0.7"
+      friction="0" />
+  </joint>
+
+</robot>

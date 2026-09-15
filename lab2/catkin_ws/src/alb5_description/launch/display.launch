@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+<launch>
+  <arg
+    name="model" />
+  <arg
+    name="gui"
+    default="False" />
+  <param
+    name="robot_description"
+    textfile="$(find alb5_description)/urdf/alb5.URDF" />
+  <param
+    name="use_gui"
+    value="$(arg gui)" />
+  <rosparam command="load" file="$(find lynxmotion_ssc32)/config/alb5_ssc32.config"/>
+
+<!-- Use joint_state_publisher for controlling the robot -->
+
+<!--
+<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+     <rosparam param="source_list">[/custom_joint_states]</rosparam>
+</node>
+-->
+
+
+<!-- Only use joint_state_publisher_gui for testing the robot joints -->
+<!-- Comment out the next block if you are writing your own publisher scripts -->
+
+
+<node
+    name="joint_state_publisher_gui"
+    pkg="joint_state_publisher_gui"
+    type="joint_state_publisher_gui" />
+
+
+
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+
+<!-- Comment out the next block if you want to run RViz only (no real robot) -->
+  <node
+    name="joint_controller"
+    pkg="lynxmotion_ssc32"
+    type="joint_controller" />
+
+
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find alb5_description)/urdf.rviz" />
+</launch>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>alb5_description</name>
+  <version>0.0.0</version>
+  <description>The alb5_description package</description>
+
+  <maintainer email="cac1598@rit.edu">Chris Crippen</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://http://gazebosim.org/w/index.php?title=Tutorials/1.9/Using_A_URDF_In_Gazebo</url>
+
+
+  <author email="cac1598@rit.edu">Chris Crippen</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
