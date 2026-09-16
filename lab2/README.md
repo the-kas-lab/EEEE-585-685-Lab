@@ -21,7 +21,10 @@ lab2/
 ├── .devcontainer/
 │   ├── linux/devcontainer.json
 │   ├── macos/devcontainer.json
-│   └── windows/devcontainer.json
+│   ├── windows/devcontainer.json
+│   └── link-serial.sh          # /dev/ttyUSB* -> /host/dev/ttyUSB* each start
+├── scripts/
+│   └── attach-arm.ps1          # Windows: keeps the arm attached to WSL2
 └── catkin_ws/
     └── src/
         ├── alb5_description/
@@ -45,8 +48,14 @@ Same as lab1:
 3. **X11 / GUI forwarding**, so RViz can reach your screen — follow
    [lab1/docs/x11-setup.md](../lab1/docs/x11-setup.md) for your OS.
 4. **Windows only** — the SSC-32(U) arm controller connects over USB
-   serial, which needs one extra passthrough step so the container can see
-   it. Follow [docs/usb-serial-setup.md](docs/usb-serial-setup.md).
+   serial, and Docker Desktop's WSL2 VM has no USB stack of its own, so the
+   device has to be forwarded into it with `usbipd`. One elevated command
+   per machine, then [scripts/attach-arm.ps1](scripts/attach-arm.ps1) keeps
+   the arm attached for the rest of the session. Follow
+   [docs/usb-serial-setup.md](docs/usb-serial-setup.md).
+
+   The container builds and opens whether or not the arm is plugged in, on
+   every OS — plug it in later and it appears inside without a rebuild.
 
 ## Quick start
 
