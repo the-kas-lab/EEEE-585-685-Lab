@@ -1,0 +1,7 @@
+# Everything here runs inside a Linux container. Force LF on checkout so a
+# Windows clone (core.autocrlf=true) doesn't hand bash/python a CRLF file:
+# a "#!/usr/bin/env python3\r" shebang makes `ros2 run` fail with
+# "python3\r: No such file or directory".
+*.sh   text eol=lf
+*.py   text eol=lf
+*.bash text eol=lf

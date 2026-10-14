@@ -1,0 +1,36 @@
+{
+  "name": "UR5e arm (ROS 2 Humble - Linux)",
+  "build": {
+    "dockerfile": "../../docker/Dockerfile",
+    "context": "../../docker",
+    "args": {
+      "USERNAME": "robotuser",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "remoteUser": "robotuser",
+  "updateRemoteUserUID": true,
+  "postCreateCommand": "sed -i 's/\\r$//' docker/postCreate.sh && bash docker/postCreate.sh",
+  "runArgs": [
+    "--network=host",
+    "--shm-size=1g",
+    "-e", "DISPLAY=${localEnv:DISPLAY}",
+    "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+  ],
+  "containerEnv": {
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "LIBGL_ALWAYS_INDIRECT": "0",
+    "QT_X11_NO_MITSHM": "1",
+    "ROS_DOMAIN_ID": "0",
+    "ROS_LOCALHOST_ONLY": "1"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-iot.vscode-ros"],
+      "settings": {
+        "files.eol": "\n"
+      }
+    }
+  }
+}
