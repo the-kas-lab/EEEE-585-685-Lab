@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!--
+  amigo_sonar.xacro - the 8-transducer sonar ring.
+
+  Numbering follows the AmigoBot User's Guide: 0..7 clockwise seen from above,
+  starting with the sonar closest to the LEFT wheel.  1 each side, 4 forward,
+  2 rear.  Poses must match amigo_description/config/amigo_params.yaml - the
+  Python nodes read the YAML, the simulator reads this file.  Nothing at
+  runtime enforces that; amigo_tools/test/test_param_consistency.py does.
+
+  In simulation each transducer is a narrow Gazebo ray sensor published as
+  sensor_msgs/Range on /sonar/range_<id>.  amigo_tools/sonar_aggregator.py then
+  fuses the eight Ranges into the same sensor_msgs/PointCloud that RosAria
+  publishes on the real robot, so student code is identical either way.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="sonar_unit" params="id x y yaw">
+
+    <link name="sonar_${id}_link">
+      <visual>
+        <geometry><cylinder radius="0.010" length="0.004"/></geometry>
+        <origin xyz="0 0 0" rpy="0 ${PI/2} 0"/>
+        <material name="amigo_gold"/>
+      </visual>
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
+      </inertial>
+    </link>
+
+    <joint name="sonar_${id}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child  link="sonar_${id}_link"/>
+      <origin xyz="${x} ${y} ${sonar_z}" rpy="0 0 ${yaw}"/>
+    </joint>
+
+    <gazebo reference="sonar_${id}_link">
+      <material>Gazebo/Gold</material>
+      <sensor type="ray" name="sonar_${id}_sensor">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <update_rate>${sonar_rate}</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>5</samples>
+              <resolution>1.0</resolution>
+              <min_angle>${-sonar_fov/2.0}</min_angle>
+              <max_angle>${ sonar_fov/2.0}</max_angle>
+            </horizontal>
+            <!-- Horizontal fan only, deliberately.  A vertical fan of the
+                 same width puts the lowest ray into the floor at
+                 sonar_height / sin(fov/2) = 0.0708 / sin(0.07) = 1.01 m, and
+                 since gazebo_ros_range reports the MINIMUM over the fan,
+                 every transducer would read a constant ~1.0 m forever.
+                 Symptom: all 8 ranges identical and independent of the
+                 surroundings. -->
+          </scan>
+          <!-- Gazebo starts each ray at <min>, so a min range larger than the
+               distance from the transducer to the outside of the chassis is
+               what stops the sonar from detecting the robot's own body.  The
+               worst case here is transducer 1, which exits the hull after
+               about 46 mm, so 100 mm is a comfortable margin.  Symptom if you
+               get this wrong: every sonar reads exactly min_range forever. -->
+          <range>
+            <min>${sonar_min_range}</min>
+            <max>${sonar_max_range}</max>
+            <resolution>0.01</resolution>
+          </range>
+        </ray>
+        <plugin name="sonar_${id}_controller" filename="libgazebo_ros_range.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${sonar_rate}</updateRate>
+          <topicName>sonar/range_${id}</topicName>
+          <frameName>sonar_${id}_link</frameName>
+          <fov>${sonar_fov}</fov>
+          <radiation>ultrasound</radiation>
+          <gaussianNoise>0.005</gaussianNoise>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+  </xacro:macro>
+
+  <!-- id      x        y        yaw (rad)          -->
+  <xacro:sonar_unit id="0" x=" 0.070" y=" 0.100" yaw=" 1.5708"/>  <!--  +90 deg  left side  -->
+  <xacro:sonar_unit id="1" x=" 0.125" y=" 0.075" yaw=" 0.7156"/>  <!--  +41 deg             -->
+  <xacro:sonar_unit id="2" x=" 0.144" y=" 0.030" yaw=" 0.2618"/>  <!--  +15 deg             -->
+  <xacro:sonar_unit id="3" x=" 0.144" y="-0.030" yaw="-0.2618"/>  <!--  -15 deg             -->
+  <xacro:sonar_unit id="4" x=" 0.120" y="-0.075" yaw="-0.7156"/>  <!--  -41 deg             -->
+  <xacro:sonar_unit id="5" x=" 0.070" y="-0.100" yaw="-1.5708"/>  <!--  -90 deg  right side -->
+  <xacro:sonar_unit id="6" x="-0.146" y="-0.058" yaw="-2.5307"/>  <!-- -145 deg  rear right -->
+  <xacro:sonar_unit id="7" x="-0.146" y=" 0.058" yaw=" 2.5307"/>  <!-- +145 deg  rear left  -->
+
+</robot>

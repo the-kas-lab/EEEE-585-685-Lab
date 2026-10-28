@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>amigo_tools</name>
+  <version>1.0.0</version>
+  <description>
+    Course-maintained helper nodes for the AmigoBot lab: the /wheel_velocities
+    publisher, the sonar bridge that makes simulation and hardware look alike,
+    an odometry-error logger, and open-loop motion patterns.
+    Pure Python, no ARIA dependency.
+  </description>
+  <maintainer email="ece-robotics@rit.edu">RIT KGCOE Robotics Lab</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>amigo_description</exec_depend>
+
+  <!-- test/test_param_consistency.py.  xacro is optional there: with it the
+       test diffs the YAML against the fully expanded URDF, without it against
+       the literal xacro call sites. -->
+  <test_depend>python3-nose</test_depend>
+  <test_depend>xacro</test_depend>
+</package>

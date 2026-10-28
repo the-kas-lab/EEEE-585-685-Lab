@@ -1,0 +1,23 @@
+# Windows students clone with core.autocrlf=true by default, which would
+# rewrite these files with CRLF endings. Anything that gets executed or
+# sourced *inside* the Linux container must stay LF: bash treats a trailing
+# CR as part of the last word on the line, so `cd ~/catkin_ws<CR>` silently
+# refers to a different (CR-named) directory.
+* text=auto eol=lf
+
+*.sh      text eol=lf
+Dockerfile text eol=lf
+*.bash    text eol=lf
+*.py      text eol=lf
+*.launch  text eol=lf
+*.xml     text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.cmake   text eol=lf
+CMakeLists.txt text eol=lf
+
+# Binary files: never touch.
+*.png binary
+*.jpg binary
+*.pdf binary
+*.bag binary

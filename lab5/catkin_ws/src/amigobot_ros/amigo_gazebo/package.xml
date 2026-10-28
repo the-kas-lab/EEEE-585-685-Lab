@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>amigo_gazebo</name>
+  <version>1.0.0</version>
+  <description>
+    Gazebo Classic simulation of the AmigoBot for EEEE-585/685 Lab 5.
+    Depends only on gazebo_ros and amigo_description - it does NOT need ARIA
+    or ROSARIA, so the whole simulation half of the lab builds and runs on a
+    stock ROS Noetic install.
+  </description>
+  <maintainer email="ece-robotics@rit.edu">RIT KGCOE Robotics Lab</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_plugins</exec_depend>
+  <exec_depend>amigo_description</exec_depend>
+  <exec_depend>amigo_tools</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>rqt_robot_steering</exec_depend>
+</package>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>amigo_student</name>
+  <version>1.0.0</version>
+  <description>
+    Skeleton package for EEEE-585/685 Lab 5.  Fill in the TODOs; this is the
+    package you submit.  Rename it to your team name if you prefer - just be
+    consistent with the rosrun commands in your report.
+  </description>
+  <maintainer email="you@rit.edu">Your Name</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+</package>

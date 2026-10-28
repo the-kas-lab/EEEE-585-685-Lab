@@ -5,7 +5,7 @@ Code materials for the EEEE 585/685 labs, maintained by the group admins.
 ## Labs
 
 - **[lab1/](lab1/)** — turtlesim devcontainer tutorial: run ROS 1 Noetic or ROS 2 Humble in a VS Code dev container with a GUI simulator, on any host OS.
-
+- **[lab5/](lab5/)** — AmigoBot navigation with ROS 1 Noetic: student handout, Gazebo simulation, sonar and odometry tasks, and a VS Code dev container.
 
 Each lab is its own self-contained dev container (own Dockerfile, own
 `.devcontainer/` per host OS) so dependencies don't leak between labs — open

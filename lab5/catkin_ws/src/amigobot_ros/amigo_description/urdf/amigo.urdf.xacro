@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+  Top-level AmigoBot description.
+
+  Build it standalone with:
+      rosrun xacro xacro amigo.urdf.xacro > /tmp/amigo.urdf
+      check_urdf /tmp/amigo.urdf
+-->
+<robot name="amigo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="simulation" default="true"/>
+
+  <xacro:include filename="$(find amigo_description)/urdf/amigo_properties.xacro"/>
+  <xacro:include filename="$(find amigo_description)/urdf/amigo_inertia.xacro"/>
+  <xacro:include filename="$(find amigo_description)/urdf/amigo_base.xacro"/>
+  <xacro:include filename="$(find amigo_description)/urdf/amigo_sonar.xacro"/>
+
+  <!-- Gazebo plugins are only injected when the model is spawned in Gazebo.
+       On the real robot RosAria owns cmd_vel/odom, so we leave them out. -->
+  <xacro:if value="$(arg simulation)">
+    <xacro:include filename="$(find amigo_description)/urdf/amigo_gazebo.xacro"/>
+  </xacro:if>
+
+</robot>

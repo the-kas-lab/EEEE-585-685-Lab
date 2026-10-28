@@ -1,0 +1,80 @@
+# ---------------------------------------------------------------------------
+# AmigoBot physical parameters -- SINGLE SOURCE OF TRUTH
+# ---------------------------------------------------------------------------
+# Loaded straight into a node's PRIVATE namespace, e.g.
+#
+#   <node name="wheel_velocity_publisher" pkg="amigo_tools"
+#         type="wheel_velocity_publisher.py">
+#     <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+#               command="load"/>
+#   </node>
+#
+# so the keys below appear as ~wheel_radius, ~sonar_poses, and so on.  Nodes
+# ignore keys they do not use.  Keep this file in sync with
+# amigo_description/urdf/amigo_properties.xacro (the URDF cannot read YAML),
+# with the sonar poses in urdf/amigo_sonar.xacro, and with the hardcoded
+# fallbacks in the amigo_tools nodes.  After editing anything here, run
+#
+#   python3 $(rospack find amigo_tools)/test/test_param_consistency.py
+#
+# which diffs all of those against this file and names whatever you missed.
+#
+# Provenance is given for every number.  One is marked VERIFY
+# (wheel_separation): it is not published by ActivMedia/Omron and must be
+# checked against the hardware.
+# ---------------------------------------------------------------------------
+
+# Wheel radius [m].  Datasheet: "the tires are four inches in diameter".
+# Cross-check against the encoder spec: 9,550 ticks/rev at 30 ticks/mm gives a
+# circumference of 9550/30 = 318.3 mm, hence D = 318.3/pi = 101.3 mm.  Agrees.
+wheel_radius: 0.0508
+
+# Distance between the two wheel contact points [m].
+# VERIFY -- not published by the manufacturer.  The body is 280 mm wide, so
+# this is a starting estimate.  Calibrate it with the spin test in Task 1.
+# Note the AmigoBot's wheels sit inside the shell, so the true value is
+# smaller.  ARIA's amigo-sh.p has DiffConvFactor 0.011, and ARIA computes
+# w = (v_R - v_L)/2 * DiffConvFactor, which implies an effective wheelbase
+# of 2/0.011 = 182 mm.  The firmware reports w directly, so ARIA marks that
+# factor as unused, and it may be stale.  Measure before trusting either.
+wheel_separation: 0.280
+
+# Encoder resolution.  Source: AmigoBot User's Guide, "Specifications".
+# (The 2025 edition of this lab quoted 39,000 ticks/rev and 95,000 CPR; those
+# are Pioneer-family numbers and do not apply to the AmigoBot.)
+encoder_ticks_per_rev: 9550
+encoder_ticks_per_mm: 30
+
+# Motion limits.  Source: Adept AmigoBot datasheet; ARIA's ArRobotAmigo class
+# reports a robot radius of 180 mm and a max rotational velocity of 300 deg/s,
+# but the published platform spec is the more conservative 100 deg/s.
+max_linear_velocity: 1.0       # m/s
+max_angular_velocity: 1.745    # rad/s  (100 deg/s)
+
+# --- Sonar ring ------------------------------------------------------------
+min_range: 0.10                # m
+max_range: 4.00                # m -- practically useful to about 2 m indoors
+fov: 0.14                      # rad, roughly an 8 deg cone
+frame_prefix: "sonar_"
+frame_suffix: "_link"
+
+# 8 transducers: 1 each side, 4 forward, 2 rear.  Numbered 0..7 clockwise seen
+# from above, starting with the sonar closest to the LEFT wheel (User's Guide,
+# self-test section).  Poses are metres and radians in base_link.
+#
+# Source: the manufacturer's ARIA robot parameter file for the AmigoBot, which
+# ships in the dev container:
+#     grep SonarUnit /usr/local/share/Aria/params/amigo-sh.p
+# Those are millimetres and degrees from the centre of rotation (= base_link);
+# converted here.  This is also what RosAria itself uses to place the echo
+# points it publishes, so these must match it for sonar_splitter to recover
+# the right ranges.  The z height is not in the ARIA file (estimate).
+sonar_poses:
+  - {id: 0, x:  0.070, y:  0.100, z: 0.02, yaw:  1.5708}   #  +90 deg  left side
+  - {id: 1, x:  0.125, y:  0.075, z: 0.02, yaw:  0.7156}   #  +41 deg
+  - {id: 2, x:  0.144, y:  0.030, z: 0.02, yaw:  0.2618}   #  +15 deg
+  - {id: 3, x:  0.144, y: -0.030, z: 0.02, yaw: -0.2618}   #  -15 deg
+  - {id: 4, x:  0.120, y: -0.075, z: 0.02, yaw: -0.7156}   #  -41 deg
+  - {id: 5, x:  0.070, y: -0.100, z: 0.02, yaw: -1.5708}   #  -90 deg  right side
+  - {id: 6, x: -0.146, y: -0.058, z: 0.02, yaw: -2.5307}   # -145 deg  rear right
+  - {id: 7, x: -0.146, y:  0.058, z: 0.02, yaw:  2.5307}   # +145 deg  rear left

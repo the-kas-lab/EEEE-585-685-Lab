@@ -1,0 +1,24 @@
+# Parameters passed to the RosAria node.  Loaded into its private namespace.
+#
+# port is set from the launch file (it depends on which robot you booked), so
+# it is intentionally absent here.
+
+# TF frame names.  These must match the URDF in amigo_description.
+odom_frame: "odom"
+base_link_frame: "base_link"
+sonar_frame: "base_link"
+bumpers_frame: "base_link"
+
+# Velocity and acceleration limits enforced by ARIA before the command reaches
+# ARCOS.  Units are ARIA's: mm/s, mm/s^2, deg/s, deg/s^2.
+# Keep these well under the platform maxima (1 m/s, 100 deg/s) for a teaching
+# lab -- an AmigoBot at full speed will find the nearest table leg.
+trans_accel: 300.0
+trans_decel: 300.0
+rot_accel: 100.0
+rot_decel: 100.0
+
+# Watchdog: ARCOS stops the motors if no command arrives within this many
+# milliseconds.  A student node publishing at 1 Hz will stutter; publish at
+# 10 Hz or more.
+# (Set on the robot with ARCOS parameter WatchdogTime; shown here as a reminder.)

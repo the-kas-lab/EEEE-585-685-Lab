@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!--
+  amigo_interface.launch
+  ======================
+  Everything that must look identical in simulation and on hardware.
+  Included by amigo_gazebo/amigo_sim.launch and amigo_bringup/amigo_real.launch;
+  you should not normally launch it on its own.
+
+  After this file has run, the following interface exists either way:
+
+    /cmd_vel            geometry_msgs/Twist            command in
+    /odom               nav_msgs/Odometry              driver dead reckoning
+    /sonar              sensor_msgs/PointCloud         8 echo points
+    /sonar/range_0..7   sensor_msgs/Range              per transducer
+    /wheel_velocities   std_msgs/Float32MultiArray     [omega_L, omega_R] rad/s
+    /joint_states       sensor_msgs/JointState
+    TF: odom -> base_link -> {wheels, caster, sonar_0..7, base_footprint}
+
+  The sim/real branches are written out twice rather than folded into an
+  $(eval ...) expression, because roslaunch hands arg() a *string*: "false"
+  is truthy in Python and the conditional would silently pick the wrong branch.
+-->
+<launch>
+  <arg name="simulation" default="true"/>
+
+  <!-- ================= /wheel_velocities ================= -->
+
+  <!-- Simulation: Gazebo publishes real (simulated) wheel joint states. -->
+  <node if="$(arg simulation)"
+        name="wheel_velocity_publisher" pkg="amigo_tools"
+        type="wheel_velocity_publisher.py" output="screen">
+    <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+              command="load"/>
+    <param name="source" value="joint_states"/>
+    <param name="publish_joint_states" value="false"/>
+    <param name="rate" value="20.0"/>
+  </node>
+
+  <!-- Hardware: no per-wheel topic exists, so invert the body twist that
+       ARCOS computes from the encoders and RosAria forwards on /odom. -->
+  <node unless="$(arg simulation)"
+        name="wheel_velocity_publisher" pkg="amigo_tools"
+        type="wheel_velocity_publisher.py" output="screen">
+    <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+              command="load"/>
+    <param name="source" value="twist"/>
+    <param name="publish_joint_states" value="true"/>
+    <param name="rate" value="20.0"/>
+  </node>
+
+  <!-- ================= sonar bridge ================= -->
+
+  <!-- Hardware: RosAria's raw PointCloud (/RosAria/sonar, echo points only,
+       no channels)  ->  8 Range topics.  RosAria only switches the sonar on
+       while something subscribes, and this node always does. -->
+  <node unless="$(arg simulation)" name="sonar_splitter" pkg="amigo_tools"
+        type="sonar_splitter.py" output="screen">
+    <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+              command="load"/>
+    <remap from="sonar" to="/RosAria/sonar"/>
+  </node>
+
+  <!-- Both: 8 Range topics  ->  /sonar PointCloud with "index" and "range"
+       channels.  Gazebo produces the Range topics directly; on hardware they
+       come from sonar_splitter above.  Running the same node either way is
+       what makes /sonar byte-for-byte the same shape in both. -->
+  <node name="sonar_aggregator" pkg="amigo_tools"
+        type="sonar_aggregator.py" output="screen">
+    <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+              command="load"/>
+    <param name="frame_id" value="base_link"/>
+    <param name="rate" value="10.0"/>
+  </node>
+</launch>

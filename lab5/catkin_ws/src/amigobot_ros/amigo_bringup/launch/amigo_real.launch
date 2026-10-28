@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!--
+  amigo_real.launch  - the physical AmigoBot.
+
+      roslaunch amigo_bringup amigo_real.launch robot:=amigo3
+      roslaunch amigo_bringup amigo_real.launch robot_ip:=amigo3.rit.edu   (2025 syntax)
+
+  The robot's controller speaks the Pioneer serial protocol over a
+  serial-to-Ethernet bridge on TCP port 8101.  RosAria (which wraps ARIA /
+  AriaCoda, both built into the dev container) opens that socket when its
+  ~port parameter contains a colon.  The connection is outbound only, so it
+  works from inside the container on any host OS.
+
+  The topics come out with the same names and types as in simulation, so the
+  node you wrote against Gazebo runs here untouched:
+
+      /RosAria/pose      ->  /odom                (remap)
+      /RosAria/cmd_vel   <-  /cmd_vel             (remap)
+      /RosAria/sonar     ->  /sonar/range_0..7    (sonar_splitter)
+                         ->  /sonar               (sonar_aggregator, adds the
+                                                   index/range channels that
+                                                   RosAria's cloud lacks)
+
+  RosAria broadcasts odom -> base_link itself, so nothing else may.
+
+  Arguments:
+      robot:=amigo3               short name; expands to amigo3.rit.edu
+      robot_ip:=192.168.1.11      use instead of robot: for a raw address
+      tcp_port:=8101              TCP port of the serial bridge
+      rviz:=false                 skip RViz
+      steering:=true              open rqt_robot_steering
+-->
+<launch>
+  <arg name="robot"     default="amigo3"/>
+  <arg name="robot_ip"  default="$(arg robot).rit.edu"/>
+  <arg name="tcp_port"  default="8101"/>
+  <arg name="rviz"      default="true"/>
+  <arg name="steering"  default="false"/>
+
+  <!-- ================= driver ================= -->
+  <!-- required: if ARIA cannot connect, take the whole launch down with a
+       clear error instead of leaving RViz up showing nothing. -->
+  <!-- launch-prefix: preflight.sh pings the robot and explains a failure in
+       plain words before ARIA starts its ~75 s connection attempt. -->
+  <node name="RosAria" pkg="rosaria" type="RosAria" output="screen" required="true"
+        launch-prefix="bash $(find amigo_bringup)/scripts/preflight.sh $(arg robot_ip)">
+    <rosparam file="$(find amigo_bringup)/config/rosaria.yaml" command="load"/>
+    <param name="port" value="$(arg robot_ip):$(arg tcp_port)"/>
+
+    <remap from="/RosAria/pose"    to="/odom"/>
+    <remap from="/RosAria/cmd_vel" to="/cmd_vel"/>
+  </node>
+
+  <!-- ================= model and TF ================= -->
+  <!-- publish_fake_joint_states stays false: wheel_velocity_publisher is
+       already integrating wheel angles onto /joint_states in twist mode. -->
+  <include file="$(find amigo_description)/launch/description.launch">
+    <arg name="simulation" value="false"/>
+    <arg name="publish_fake_joint_states" value="false"/>
+  </include>
+
+  <!-- ================= shared interface ================= -->
+  <include file="$(find amigo_tools)/launch/amigo_interface.launch">
+    <arg name="simulation" value="false"/>
+  </include>
+
+  <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find amigo_description)/rviz/amigo.rviz"/>
+
+  <node if="$(arg steering)" name="rqt_robot_steering" pkg="rqt_robot_steering"
+        type="rqt_robot_steering"/>
+</launch>

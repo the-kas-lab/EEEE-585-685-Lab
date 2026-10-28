@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+  amigo_gazebo.xacro - Gazebo-only tags: surface properties and plugins.
+
+  Two odometry sources are published on purpose:
+    /odom               differential-drive plugin, odometrySource=encoder.
+                        This is DEAD RECKONING and it drifts, exactly like the
+                        real robot's ARCOS encoder odometry.
+    /ground_truth/state P3D plugin reading the true pose out of the physics
+                        engine.  Simulation only - use it as the reference when
+                        you quantify dead-reckoning error.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- - surface properties - -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Red</material>
+    <mu1>0.3</mu1>
+    <mu2>0.3</mu2>
+  </gazebo>
+
+  <xacro:macro name="wheel_surface" params="side">
+    <gazebo reference="${side}_wheel_link">
+      <material>Gazebo/Black</material>
+      <mu1>1.2</mu1>
+      <mu2>1.2</mu2>
+      <kp>1000000.0</kp>
+      <kd>100.0</kd>
+      <minDepth>0.001</minDepth>
+      <maxVel>1.0</maxVel>
+    </gazebo>
+  </xacro:macro>
+  <xacro:wheel_surface side="left"/>
+  <xacro:wheel_surface side="right"/>
+
+  <gazebo reference="caster_link">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <!-- - differential drive - -->
+  <gazebo>
+    <plugin name="amigo_diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>50.0</updateRate>
+      <legacyMode>false</legacyMode>
+      <leftJoint>left_wheel_joint</leftJoint>
+      <rightJoint>right_wheel_joint</rightJoint>
+      <wheelSeparation>${wheel_separation}</wheelSeparation>
+      <wheelDiameter>${2.0*wheel_radius}</wheelDiameter>
+      <wheelAcceleration>1.5</wheelAcceleration>
+      <wheelTorque>5.0</wheelTorque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
+      <odometrySource>encoder</odometrySource>
+      <publishTf>1</publishTf>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelTF>false</publishWheelTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <rosDebugLevel>na</rosDebugLevel>
+    </plugin>
+  </gazebo>
+
+  <!-- - ground truth (simulation only) - -->
+  <gazebo>
+    <plugin name="amigo_ground_truth" filename="libgazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>50.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/state</topicName>
+      <frameName>world</frameName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <xyzOffsets>0 0 0</xyzOffsets>
+      <rpyOffsets>0 0 0</rpyOffsets>
+    </plugin>
+  </gazebo>
+
+</robot>

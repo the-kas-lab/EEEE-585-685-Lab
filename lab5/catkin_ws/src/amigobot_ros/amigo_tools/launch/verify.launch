@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!-- Interface smoke test.  Start the simulator or the robot first, then:
+         roslaunch amigo_tools verify.launch
+         roslaunch amigo_tools verify.launch hardware:=true
+         roslaunch amigo_tools verify.launch move:=false
+     Loads amigo_params.yaml so the consistency checks use the same geometry
+     as everything else.                                                     -->
+<launch>
+  <arg name="hardware" default="false"/>
+  <arg name="move"     default="true"/>
+
+  <node name="verify_interface" pkg="amigo_tools" type="verify_interface.py"
+        output="screen">
+    <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+              command="load"/>
+    <param name="hardware" value="$(arg hardware)"/>
+    <param name="move"     value="$(arg move)"/>
+  </node>
+</launch>

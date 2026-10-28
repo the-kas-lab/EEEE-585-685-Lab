@@ -1,0 +1,41 @@
+{
+  // One config for Linux, macOS and Windows: the GUI runs on a desktop
+  // inside the container (open http://localhost:6080), and the robot is
+  // reached over plain outbound TCP, so nothing here depends on the host OS.
+  "name": "AmigoBot (ROS 1 Noetic)",
+  "build": {
+    "dockerfile": "../docker/Dockerfile",
+    "context": "../docker",
+    "args": {
+      "USERNAME": "robotuser",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "remoteUser": "robotuser",
+  "updateRemoteUserUID": true,
+  // Keep the image's entrypoint, which starts the desktop with the container.
+  "overrideCommand": false,
+  // tini as PID 1, so nodes killed by Ctrl-C/roslaunch don't pile up as zombies.
+  "init": true,
+  // noVNC, published on the host's loopback only: the desktop has no
+  // password, so it must not be reachable from the rest of the lab network.
+  "appPort": ["127.0.0.1:6080:6080"],
+  "portsAttributes": {
+    "6080": { "label": "AmigoBot desktop" }
+  },
+  "runArgs": ["--shm-size=512m"],
+  "postCreateCommand": "sed -i 's/\\r$//' docker/postCreate.sh && bash docker/postCreate.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"],
+      "settings": {
+        "files.eol": "\n",
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.analysis.extraPaths": [
+          "/opt/ros/noetic/lib/python3/dist-packages"
+        ]
+      }
+    }
+  }
+}

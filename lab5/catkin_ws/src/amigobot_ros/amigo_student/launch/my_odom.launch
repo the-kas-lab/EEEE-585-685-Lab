@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!-- Runs your odometry node next to the error logger.  Start the simulator
+     first, then:  roslaunch amigo_student my_odom.launch                   -->
+<launch>
+  <arg name="reference" default="ground_truth/state"/>  <!-- use /odom on hardware -->
+  <arg name="log"       default="$(env HOME)/amigo_odom_error.csv"/>
+
+  <node name="my_odom" pkg="amigo_student" type="my_odom.py" output="screen">
+    <rosparam file="$(find amigo_description)/config/amigo_params.yaml"
+              command="load"/>
+  </node>
+
+  <node name="odom_error_logger" pkg="amigo_tools" type="odom_error_logger.py"
+        output="screen">
+    <param name="estimate"  value="my_odom"/>
+    <param name="reference" value="$(arg reference)"/>
+    <param name="output"    value="$(arg log)"/>
+  </node>
+</launch>

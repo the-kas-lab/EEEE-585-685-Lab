@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!--
+  amigo_base.xacro - links and joints of the AmigoBot chassis.
+
+  Frame convention (REP-103 / REP-105):
+    base_link        root; origin on the wheel axle, midway between the wheels.
+                     x forward, y left, z up.
+    base_footprint   projection of base_link onto the ground plane.  It is a
+                     CHILD of base_link, not the root, so that the odometry
+                     source (Gazebo plugin or RosAria) can own odom -> base_link
+                     without two publishers fighting over base_link's parent.
+    left/right_wheel_link, caster_link, sonar_0..7_link
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="amigo_red">   <color rgba="0.65 0.12 0.10 1.0"/></material>
+  <material name="amigo_black"> <color rgba="0.10 0.10 0.10 1.0"/></material>
+  <material name="amigo_grey">  <color rgba="0.55 0.55 0.55 1.0"/></material>
+  <material name="amigo_gold">  <color rgba="0.80 0.66 0.24 1.0"/></material>
+
+  <!-- ==================== base_link ==================== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${body_z}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="amigo_red"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${body_z}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertial m="${body_mass}" x="${body_length}" y="${body_width}" z="${body_height}">
+      <origin xyz="${body_com_x} 0 ${body_z}" rpy="0 0 0"/>
+    </xacro:box_inertial>
+  </link>
+
+  <!-- ==================== base_footprint ==================== -->
+  <link name="base_footprint"/>
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="base_footprint"/>
+    <origin xyz="0 0 ${-wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== Drive wheels ==================== -->
+  <xacro:macro name="drive_wheel" params="side reflect">
+    <link name="${side}_wheel_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <material name="amigo_black"/>
+      </visual>
+      <!-- Sphere, not cylinder, on purpose.  ODE puts cylinder-on-plane
+           contacts at the tyre's rims, so the effective wheelbase jumps
+           between L - w and L + w (w = tyre width) as the robot turns: the
+           robot then turns up to ~7% more or less than its own encoders
+           say, and dead reckoning is dominated by that simulator artefact.
+           A sphere touches the floor at one point, directly under the wheel
+           centre, so the wheelbase is exactly wheel_separation. -->
+      <collision>
+        <geometry><sphere radius="${wheel_radius}"/></geometry>
+      </collision>
+      <xacro:cylinder_inertial m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}">
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      </xacro:cylinder_inertial>
+    </link>
+
+    <joint name="${side}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child  link="${side}_wheel_link"/>
+      <origin xyz="${wheel_x} ${reflect*wheel_separation/2.0} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="5.0" velocity="${1.0/wheel_radius}"/>
+      <dynamics damping="0.01" friction="0.001"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:drive_wheel side="left"  reflect="1"/>
+  <xacro:drive_wheel side="right" reflect="-1"/>
+
+  <!-- ==================== Rear caster ==================== -->
+  <link name="caster_link">
+    <visual>
+      <geometry><sphere radius="${caster_radius}"/></geometry>
+      <material name="amigo_grey"/>
+    </visual>
+    <collision>
+      <geometry><sphere radius="${caster_radius}"/></geometry>
+    </collision>
+    <xacro:sphere_inertial m="${caster_mass}" r="${caster_radius}">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:sphere_inertial>
+  </link>
+
+  <joint name="caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="caster_link"/>
+    <origin xyz="${caster_x} 0 ${caster_radius - wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+</robot>

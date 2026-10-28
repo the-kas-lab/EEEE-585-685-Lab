@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- Loads robot_description onto the parameter server and starts
+     robot_state_publisher.  Included by both the sim and the real bringup. -->
+<launch>
+  <arg name="simulation" default="true"/>
+  <arg name="publish_fake_joint_states" default="false"/>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find amigo_description)/urdf/amigo.urdf.xacro' simulation:=$(arg simulation)"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- On the real robot nothing publishes wheel joint angles, so the wheels
+       would freeze the TF tree.  This zero-filler keeps RViz happy. -->
+  <node if="$(arg publish_fake_joint_states)"
+        name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+    <rosparam param="source_list">[]</rosparam>
+  </node>
+</launch>

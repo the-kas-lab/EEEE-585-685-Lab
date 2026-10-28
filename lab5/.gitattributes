@@ -1,0 +1,21 @@
+# Everything here runs inside a Linux container. Force LF on checkout so a
+# Windows clone (core.autocrlf=true) doesn't hand bash/python/roslaunch a CRLF
+# file: a "#!/usr/bin/env python3\r" shebang makes rosrun fail with
+# "python3\r: No such file or directory", and a CRLF entrypoint stops the
+# container from starting at all.
+*.sh       text eol=lf
+*.py       text eol=lf
+*.bash     text eol=lf
+*.launch   text eol=lf
+*.xacro    text eol=lf
+*.urdf     text eol=lf
+*.world    text eol=lf
+*.yaml     text eol=lf
+*.xml      text eol=lf
+*.rviz     text eol=lf
+*.json     text eol=lf
+Dockerfile text eol=lf
+CMakeLists.txt text eol=lf
+
+*.pdf binary
+*.png binary

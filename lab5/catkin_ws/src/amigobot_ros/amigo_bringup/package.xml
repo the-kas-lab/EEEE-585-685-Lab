@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>amigo_bringup</name>
+  <version>1.0.0</version>
+  <description>
+    Hardware bringup for the AmigoBot: launches RosAria against the robot's
+    serial-to-Ethernet bridge and remaps its topics onto the same names the
+    simulation uses.
+
+    rosaria is deliberately an exec_depend only.  This package contains no
+    compiled code, so a workspace WITHOUT rosaria (and therefore without ARIA)
+    still builds cleanly and the entire simulation half of the lab works.
+  </description>
+  <maintainer email="ece-robotics@rit.edu">RIT KGCOE Robotics Lab</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>amigo_description</exec_depend>
+  <exec_depend>amigo_tools</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>rqt_robot_steering</exec_depend>
+  <!-- <exec_depend>rosaria</exec_depend>  cloned into the workspace by hand -->
+</package>

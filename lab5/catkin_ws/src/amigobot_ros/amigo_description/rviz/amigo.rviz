@@ -1,0 +1,129 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded: ~
+      Splitter Ratio: 0.5
+    Tree Height: 600
+  - Class: rviz/Views
+    Expanded: ~
+    Name: Views
+    Splitter Ratio: 0.5
+Visualization Manager:
+  Class: ""
+  Name: root
+  Displays:
+    - Class: rviz/Grid
+      Cell Size: 1
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Plane: XY
+      Plane Cell Count: 20
+      Value: true
+    - Class: rviz/RobotModel
+      Enabled: true
+      Name: RobotModel
+      Robot Description: robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: false
+      Name: TF
+      Marker Scale: 0.3
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Value: false
+    - Alpha: 1
+      Class: rviz/Odometry
+      Color: 255; 85; 0
+      Covariance:
+        Value: false
+      Enabled: true
+      Keep: 500
+      Name: odom (driver dead reckoning)
+      Position Tolerance: 0.05
+      Angle Tolerance: 0.05
+      Shape:
+        Alpha: 1
+        Color: 255; 85; 0
+        Head Length: 0.06
+        Head Radius: 0.03
+        Shaft Length: 0.12
+        Shaft Radius: 0.012
+        Value: Arrow
+      Topic: /odom
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/Odometry
+      Color: 0; 170; 255
+      Covariance:
+        Value: false
+      Enabled: true
+      Keep: 500
+      Name: my_odom (your node)
+      Position Tolerance: 0.05
+      Angle Tolerance: 0.05
+      Shape:
+        Alpha: 1
+        Color: 0; 170; 255
+        Head Length: 0.06
+        Head Radius: 0.03
+        Shaft Length: 0.12
+        Shaft Radius: 0.012
+        Value: Arrow
+      Topic: /my_odom
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/PointCloud
+      Color: 0; 255; 0
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Name: sonar ring
+      Position Transformer: XYZ
+      Size (m): 0.06
+      Style: Spheres
+      Topic: /sonar
+      Unreliable: false
+      Value: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Default Light: true
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Tools:
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 3.5
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Name: Current View
+      Pitch: 0.6
+      Target Frame: <Fixed Frame>
+      Yaw: 2.4
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 850
+  Width: 1300
+  X: 60
+  Y: 60

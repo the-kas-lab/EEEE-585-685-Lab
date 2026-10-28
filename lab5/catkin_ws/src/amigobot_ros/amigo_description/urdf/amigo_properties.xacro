@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+  amigo_properties.xacro
+  Geometry, mass and sensor constants for the AmigoBot.
+  Keep these in sync with amigo_description/config/amigo_params.yaml;
+  amigo_tools/test/test_param_consistency.py checks that you did.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============ Drive train ============ -->
+  <xacro:property name="wheel_radius"     value="0.0508"/>  <!-- 4 in tires        -->
+  <xacro:property name="wheel_width"      value="0.030"/>
+  <xacro:property name="wheel_separation" value="0.280"/>   <!-- VERIFY by test    -->
+  <xacro:property name="wheel_mass"       value="0.25"/>
+  <xacro:property name="wheel_x"          value="0.000"/>   <!-- axle at base_link -->
+
+  <!-- ============ Body ============ -->
+  <xacro:property name="body_length"  value="0.330"/>
+  <xacro:property name="body_width"   value="0.280"/>
+  <xacro:property name="body_height"  value="0.130"/>
+  <xacro:property name="body_clear"   value="0.030"/>       <!-- ground clearance  -->
+  <xacro:property name="body_mass"    value="3.00"/>
+  <!-- Centre of mass BEHIND the axle, so the robot rests on its rear caster.
+       With it on the axle (x = 0) the robot balances on the wheels, and the
+       first hard stop tips it onto its nose and leaves it there: ~10 deg
+       pitched, with the front sonars ranging off the floor at ~0.26 m.
+       Tipping forward now needs a deceleration of g * 0.05 / 0.095 ~ 5 m/s^2. -->
+  <xacro:property name="body_com_x"   value="-0.050"/>
+
+  <!-- base_link sits on the wheel axle, so the body underside is at
+       (body_clear - wheel_radius) in base_link coordinates. -->
+  <xacro:property name="body_z" value="${body_clear - wheel_radius + body_height/2.0}"/>
+
+  <!-- ============ Rear caster ============ -->
+  <xacro:property name="caster_radius" value="0.0155"/>
+  <xacro:property name="caster_x"      value="-0.120"/>
+  <xacro:property name="caster_mass"   value="0.10"/>
+
+  <!-- ============ Sonar ring ============ -->
+  <xacro:property name="sonar_min_range" value="0.10"/>
+  <xacro:property name="sonar_max_range" value="4.00"/>
+  <xacro:property name="sonar_fov"       value="0.14"/>     <!-- ~8 deg cone -->
+  <xacro:property name="sonar_z"         value="0.020"/>
+  <xacro:property name="sonar_rate"      value="10.0"/>
+
+  <xacro:property name="PI" value="3.14159265359"/>
+
+</robot>

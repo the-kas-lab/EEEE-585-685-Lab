@@ -1,0 +1,139 @@
+<?xml version="1.0" ?>
+<!--
+  amigo_lab.world - a 6 m x 6 m walled room with a few obstacles.
+
+  The room exists so the sonar ring has something to echo off.  Sonar returns
+  nothing useful in an empty world, which is the single most common reason a
+  student reports "my sonar topic is all max range".
+-->
+<sdf version="1.6">
+  <world name="amigo_lab">
+
+    <include><uri>model://sun</uri></include>
+    <include><uri>model://ground_plane</uri></include>
+
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <scene>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <shadows>false</shadows>
+    </scene>
+
+    <!-- ============ Perimeter walls ============ -->
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0 3 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>6.1 0.1 0.7</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.1 0.1 0.7</size></box></geometry>
+          <material><script><name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0 -3 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>6.1 0.1 0.7</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.1 0.1 0.7</size></box></geometry>
+          <material><script><name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>3 0 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.1 6.1 0.7</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.1 6.1 0.7</size></box></geometry>
+          <material><script><name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-3 0 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.1 6.1 0.7</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.1 6.1 0.7</size></box></geometry>
+          <material><script><name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============ Obstacles ============ -->
+    <!-- Obstacles stay clear of the box (-0.4..1.9) x (-0.4..1.9): that is
+         where the robot spawns and where drive_pattern.py's 1.5 m square
+         (the Task 4 test drive) runs.  A pillar inside it gets rammed, the
+         wheels spin in place, and the dead-reckoning error that results has
+         nothing to do with the student's code. -->
+    <model name="pillar_a">
+      <static>true</static>
+      <pose>2.3 2.0 0.3 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.15</radius><length>0.6</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.15</radius><length>0.6</length></cylinder></geometry>
+          <material><script><name>Gazebo/Blue</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="pillar_b">
+      <static>true</static>
+      <pose>-1.4 -1.6 0.3 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.15</radius><length>0.6</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.15</radius><length>0.6</length></cylinder></geometry>
+          <material><script><name>Gazebo/Blue</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="crate">
+      <static>true</static>
+      <pose>-1.8 1.7 0.2 0 0 0.4</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.5 0.5 0.4</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.5 0.5 0.4</size></box></geometry>
+          <material><script><name>Gazebo/Wood</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri></script></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
