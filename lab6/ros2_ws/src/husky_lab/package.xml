@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>husky_lab</name>
+  <version>1.0.0</version>
+  <description>Lab 6: simulated Husky A200 (twist_mux with the robot's configuration and a kinematic model)</description>
+  <maintainer email="noreply@rit.edu">EEEE-585/685 TAs</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>twist_mux</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

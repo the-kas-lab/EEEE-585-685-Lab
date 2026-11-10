@@ -1,0 +1,331 @@
+#!/usr/bin/env python3
+"""lab6-check: test a team's husky_teleop node against the Lab 6 requirements.
+
+Runs `ros2 run husky_teleop teleop` in a pseudo-terminal, types keys into it,
+and records what it publishes. The node runs on its own ROS domain, so it
+does not drive your simulator while it is being tested.
+"""
+
+import glob
+import os
+import pty
+import select
+import signal
+import sys
+import threading
+import time
+
+import rclpy
+from geometry_msgs.msg import Twist
+
+WS = os.path.expanduser('~/ros2_ws')
+DOMAIN = 42
+CHECK_TOPIC = '/lab6_check/cmd_vel'
+CHECK_V, CHECK_W = 0.25, 0.5          # limits passed in for the main run
+DEFAULT_TOPIC = '/a200_0252/cmd_vel'
+DEFAULT_V, DEFAULT_W = 0.3, 0.6
+RELEASE_LIMIT = 0.6                    # R3
+STOP_LIMIT = 0.15                      # R4: "immediately", allowing one publish period
+REPEAT_DELAY, REPEAT_RATE = 0.25, 30.0  # robot laptop keyboard settings
+EPS = 1e-6
+
+results = []
+
+
+def report(ok, req, text, detail=''):
+    results.append(ok)
+    tag = 'PASS' if ok else 'FAIL'
+    print(f'  [{tag}] {req:<3} {text}' + (f'  ({detail})' if detail else ''), flush=True)
+
+
+def info(text):
+    print(f'  [info]     {text}', flush=True)
+
+
+class TeleopUnderTest:
+    """The team's node, running in a pseudo-terminal."""
+
+    def __init__(self, env_overrides):
+        env = dict(os.environ)
+        for k in ('HUSKY_CMD_TOPIC', 'HUSKY_MAX_LINEAR', 'HUSKY_MAX_ANGULAR'):
+            env.pop(k, None)
+        env.update(env_overrides)
+        env['ROS_DOMAIN_ID'] = str(DOMAIN)
+        env['ROS_LOCALHOST_ONLY'] = '1'
+        cmd = ('source /opt/ros/humble/setup.bash && '
+               f'source {WS}/install/setup.bash && '
+               'exec ros2 run husky_teleop teleop')
+        self.pid, self.fd = pty.fork()
+        if self.pid == 0:
+            os.execvpe('bash', ['bash', '-c', cmd], env)
+        self.output = b''
+        self.exit_status = None
+        threading.Thread(target=self._drain, daemon=True).start()
+
+    def _drain(self):
+        while True:
+            try:
+                r, _, _ = select.select([self.fd], [], [], 0.2)
+                if r:
+                    data = os.read(self.fd, 4096)
+                    if not data:
+                        return
+                    self.output += data
+            except OSError:
+                return
+
+    def alive(self):
+        if self.exit_status is not None:
+            return False
+        pid, status = os.waitpid(self.pid, os.WNOHANG)
+        if pid == 0:
+            return True
+        self.exit_status = status
+        return False
+
+    def key(self, ch):
+        os.write(self.fd, ch.encode())
+
+    def wait_exit(self, timeout):
+        end = time.monotonic() + timeout
+        while time.monotonic() < end:
+            if not self.alive():
+                return True
+            time.sleep(0.02)
+        return False
+
+    def kill(self):
+        if self.alive():
+            try:
+                os.killpg(self.pid, signal.SIGKILL)
+            except OSError:
+                os.kill(self.pid, signal.SIGKILL)
+            os.waitpid(self.pid, 0)
+
+    def text(self):
+        return self.output.decode(errors='replace').replace('\r', '')
+
+
+class Recorder:
+
+    def __init__(self, node, topic):
+        self.log = []
+        self.sub = node.create_subscription(Twist, topic, self._cb, 50)
+
+    def _cb(self, m):
+        self.log.append((time.monotonic(), m.linear.x, m.angular.z))
+
+    def after(self, t):
+        return [x for x in self.log if x[0] > t]
+
+    def between(self, t0, t1):
+        return [x for x in self.log if t0 < x[0] <= t1]
+
+    def first_zero_after(self, t):
+        for x in self.after(t):
+            if abs(x[1]) < EPS and abs(x[2]) < EPS:
+                return x[0] - t
+        return None
+
+
+def wait_for_publisher(node, proc, topic, timeout):
+    end = time.monotonic() + timeout
+    while time.monotonic() < end:
+        if node.count_publishers(topic) > 0:
+            return True
+        if not proc.alive():
+            return False
+        time.sleep(0.1)
+    return False
+
+
+def topic_types(node):
+    return {name: types for name, types in node.get_topic_names_and_types()}
+
+
+def hold(proc, key, seconds):
+    """Hold a key: one press, the key-repeat delay, then repeats."""
+    t0 = time.monotonic()
+    proc.key(key)
+    time.sleep(REPEAT_DELAY)
+    while time.monotonic() - t0 < seconds:
+        proc.key(key)
+        time.sleep(1.0 / REPEAT_RATE)
+    return t0
+
+
+def fmt(dt):
+    return 'never' if dt is None else f'{dt:.2f} s'
+
+
+def start(node, env, topic, label):
+    proc = TeleopUnderTest(env)
+    rec = Recorder(node, topic)
+    if not wait_for_publisher(node, proc, topic, 40.0):
+        types = topic_types(node)
+        detail = f'nothing is published on {topic}'
+        if topic in types:
+            detail = f'{topic} has type {types[topic][0]}, expected geometry_msgs/msg/Twist'
+        elif not proc.alive():
+            detail = 'the node exited during start-up'
+        report(False, 'R2', f'node publishes on {label}', detail)
+        proc.kill()
+        print('\n----- node output -----\n' + proc.text()[-3000:] + '\n-----------------------')
+        return None, None
+    time.sleep(1.5)
+    return proc, rec
+
+
+def tap(proc, rec, key, settle=1.0):
+    t = time.monotonic()
+    proc.key(key)
+    time.sleep(settle)
+    return t, rec.between(t, t + 0.4)
+
+
+def ctrl_c(proc, rec, moving_key):
+    hold(proc, moving_key, 0.6)
+    t = time.monotonic()
+    proc.key('\x03')
+    exited = proc.wait_exit(5.0)
+    time.sleep(0.5)
+    last = rec.log[-1] if rec.log else None
+    stopped = last is not None and last[0] > t - 0.2 and abs(last[1]) < EPS and abs(last[2]) < EPS
+    return exited, stopped, last
+
+
+def main_run(node):
+    print(f'Run 1: HUSKY_CMD_TOPIC={CHECK_TOPIC} HUSKY_MAX_LINEAR={CHECK_V} '
+          f'HUSKY_MAX_ANGULAR={CHECK_W}', flush=True)
+    env = {'HUSKY_CMD_TOPIC': CHECK_TOPIC,
+           'HUSKY_MAX_LINEAR': str(CHECK_V), 'HUSKY_MAX_ANGULAR': str(CHECK_W)}
+    proc, rec = start(node, env, CHECK_TOPIC, 'HUSKY_CMD_TOPIC')
+    if proc is None:
+        return False
+    report(True, 'R2', 'publishes geometry_msgs/Twist on the topic in HUSKY_CMD_TOPIC')
+
+    t = time.monotonic()
+    time.sleep(1.0)
+    info(f'{len(rec.between(t, t + 1.0))} messages per second with no key pressed')
+
+    t, early = tap(proc, rec, 'i')
+    fwd = [x for x in early if x[1] > EPS]
+    report(bool(fwd) and all(abs(x[2]) < EPS for x in fwd), '', "'i' drives forward",
+           f'v = {fwd[0][1]:.3f}' if fwd else 'no forward command within 0.4 s')
+    dt = rec.first_zero_after(t)
+    report(dt is not None and dt <= RELEASE_LIMIT, 'R3',
+           f'single key press: zero within {RELEASE_LIMIT} s', fmt(dt))
+
+    for key, name, test in ((',', 'backward', lambda x: x[1] < -EPS),
+                            ('j', 'turns left', lambda x: x[2] > EPS),
+                            ('l', 'turns right', lambda x: x[2] < -EPS)):
+        _, early = tap(proc, rec, key)
+        report(any(test(x) for x in early), '', f"'{key}' {name}")
+
+    t0 = hold(proc, 'i', 2.0)
+    t_rel = time.monotonic()
+    held = rec.between(t0 + 0.15, t_rel)
+    zeros = sum(1 for x in held if abs(x[1]) < EPS)
+    report(bool(held) and zeros == 0, 'R3', 'key held for 2 s: no stop while held',
+           f'{zeros} zero commands out of {len(held)}' if held else 'nothing published')
+    time.sleep(1.0)
+    dt = rec.first_zero_after(t_rel)
+    report(dt is not None and dt <= RELEASE_LIMIT, 'R3',
+           f'key released: zero within {RELEASE_LIMIT} s', fmt(dt))
+
+    for key, name in ((' ', 'space bar'), ('x', "another key ('x')")):
+        hold(proc, 'i', 0.6)
+        t = time.monotonic()
+        proc.key(key)
+        time.sleep(0.6)
+        dt = rec.first_zero_after(t)
+        report(dt is not None and dt <= STOP_LIMIT, 'R4', f'{name} stops at once', fmt(dt))
+
+    vmax = max((abs(x[1]) for x in rec.log), default=0.0)
+    wmax = max((abs(x[2]) for x in rec.log), default=0.0)
+    report(vmax <= CHECK_V + EPS and wmax <= CHECK_W + EPS, 'R1',
+           'never above HUSKY_MAX_LINEAR / HUSKY_MAX_ANGULAR',
+           f'max {vmax:.3f} m/s, {wmax:.3f} rad/s')
+
+    exited, stopped, last = ctrl_c(proc, rec, 'i')
+    report(stopped, 'R4', 'Ctrl-C while moving: last command is zero',
+           'last v = %.3f' % last[1] if last else 'nothing published')
+    report(exited, 'R4', 'Ctrl-C: node exits')
+    proc.kill()
+    if 'Traceback' in proc.text():
+        info('the node printed a Python traceback:')
+        print(proc.text()[-3000:])
+    return True
+
+
+def default_run(node):
+    print(f'Run 2: no HUSKY_* variables set (defaults)', flush=True)
+    proc, rec = start(node, {}, DEFAULT_TOPIC, f'the default topic {DEFAULT_TOPIC}')
+    if proc is None:
+        return
+    report(True, 'R2', f'default topic is {DEFAULT_TOPIC}')
+    hold(proc, 'i', 1.0)
+    time.sleep(0.8)
+    hold(proc, 'j', 1.0)
+    time.sleep(0.8)
+    vmax = max((abs(x[1]) for x in rec.log), default=0.0)
+    wmax = max((abs(x[2]) for x in rec.log), default=0.0)
+    report(0 < vmax <= DEFAULT_V + EPS and 0 < wmax <= DEFAULT_W + EPS, 'R1',
+           f'default limits {DEFAULT_V} m/s and {DEFAULT_W} rad/s',
+           f'max {vmax:.3f} m/s, {wmax:.3f} rad/s')
+    exited, stopped, _ = ctrl_c(proc, rec, 'i')
+    report(exited and stopped, 'R4', 'Ctrl-C: zero, then exit')
+    proc.kill()
+
+
+def build_is_stale():
+    pkg = f'{WS}/src/husky_teleop'
+    src = [f for f in glob.glob(f'{pkg}/**/*.py', recursive=True) if '/test/' not in f]
+    src += [f'{pkg}/{n}' for n in ('setup.py', 'setup.cfg', 'package.xml')]
+    src = [f for f in src if os.path.isfile(f)]
+    marker = f'{WS}/build/husky_teleop/colcon_build.rc'   # written by every colcon build
+    if not src or not os.path.exists(marker):
+        return False
+    return max(os.path.getmtime(f) for f in src) > os.path.getmtime(marker) + 1
+
+
+def main():
+    if not os.path.isdir(f'{WS}/install/husky_teleop'):
+        print('lab6-check: husky_teleop is not built. Run, in ~/ros2_ws:\n'
+              '  colcon build --packages-select husky_teleop')
+        return 2
+    if not os.path.exists(f'{WS}/install/husky_teleop/lib/husky_teleop/teleop'):
+        print("lab6-check: the husky_teleop package has no executable named 'teleop'.\n"
+              'Check entry_points in setup.py, then rebuild.')
+        return 2
+    if build_is_stale():
+        print('lab6-check: warning: your source files are newer than the build. '
+              'Did you forget to run colcon build?\n')
+
+    print('lab6-check: testing husky_teleop (takes about a minute)\n', flush=True)
+    os.environ['ROS_LOCALHOST_ONLY'] = '1'
+    rclpy.init(domain_id=DOMAIN)
+    node = rclpy.create_node('lab6_check')
+    spinner = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
+    spinner.start()
+    try:
+        if main_run(node):
+            print()
+            default_run(node)
+    except KeyboardInterrupt:
+        print('\nlab6-check: interrupted')
+        return 130
+    finally:
+        rclpy.try_shutdown()
+
+    passed, total = sum(results), len(results)
+    print()
+    if passed == total:
+        print(f'lab6-check: all {total} checks passed. Show this to the TA.')
+        return 0
+    print(f'lab6-check: {total - passed} of {total} checks failed.')
+    return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

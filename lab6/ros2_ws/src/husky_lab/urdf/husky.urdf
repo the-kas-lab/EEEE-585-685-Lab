@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!-- Simplified Husky A200 for display only: chassis, top plate, four wheels,
+     and the LiDAR mast. Dimensions roughly match the real robot. -->
+<robot name="husky">
+  <material name="yellow"><color rgba="0.95 0.75 0.05 1"/></material>
+  <material name="black"><color rgba="0.1 0.1 0.1 1"/></material>
+  <material name="grey"><color rgba="0.4 0.4 0.4 1"/></material>
+
+  <link name="base_link"/>
+
+  <link name="chassis">
+    <visual>
+      <origin xyz="0 0 0.2"/>
+      <geometry><box size="0.99 0.57 0.2"/></geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/><child link="chassis"/>
+  </joint>
+
+  <link name="top_plate">
+    <visual>
+      <origin xyz="0 0 0.31"/>
+      <geometry><box size="0.8 0.55 0.02"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="top_plate_joint" type="fixed">
+    <parent link="base_link"/><child link="top_plate"/>
+  </joint>
+
+  <link name="lidar">
+    <visual>
+      <origin xyz="0 0 0.05"/>
+      <geometry><cylinder radius="0.05" length="0.07"/></geometry>
+      <material name="grey"/>
+    </visual>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/><child link="lidar"/>
+    <origin xyz="0.0 -0.265 0.6"/>
+  </joint>
+
+  <link name="front_left_wheel">
+    <visual>
+      <origin rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.114"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="front_left_wheel_joint" type="fixed">
+    <parent link="base_link"/><child link="front_left_wheel"/>
+    <origin xyz="0.256 0.285 0.165"/>
+  </joint>
+
+  <link name="front_right_wheel">
+    <visual>
+      <origin rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.114"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="front_right_wheel_joint" type="fixed">
+    <parent link="base_link"/><child link="front_right_wheel"/>
+    <origin xyz="0.256 -0.285 0.165"/>
+  </joint>
+
+  <link name="rear_left_wheel">
+    <visual>
+      <origin rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.114"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="rear_left_wheel_joint" type="fixed">
+    <parent link="base_link"/><child link="rear_left_wheel"/>
+    <origin xyz="-0.256 0.285 0.165"/>
+  </joint>
+
+  <link name="rear_right_wheel">
+    <visual>
+      <origin rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.114"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="rear_right_wheel_joint" type="fixed">
+    <parent link="base_link"/><child link="rear_right_wheel"/>
+    <origin xyz="-0.256 -0.285 0.165"/>
+  </joint>
+</robot>
